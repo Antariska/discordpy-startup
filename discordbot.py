@@ -116,7 +116,7 @@ async def boshu(ctx, about = "募集"):
                 
             if str(reaction.emoji) == f"{ra_x}":
                 x_user_reaction.append(user.nick)
-                
+                embed_body.set_field_at(0, name=f"{ra_x} {len(x_reaction_dic)}人 なう\n", value='\n'.join(x_user_reaction), inline=True)
                 if user.nick in spl_user_reaction:
                     print('x_user_reactionに名前あり')
                 else:
@@ -124,24 +124,19 @@ async def boshu(ctx, about = "募集"):
             
             elif str(reaction.emoji) == f"{ra_spl}":
                 spl_user_reaction.append(user.nick)
-            
+                embed_body.set_field_at(1, name=f"{ra_spl} {len(spl_reaction_dic)}人 なう\n", value='\n'.join(spl_user_reaction), inline=True)
             elif str(reaction.emoji) == f"{ra_s}":
                 s_user_reaction.append(user.nick)
-            
+                embed_body.set_field_at(2, name=f"{ra_s} {len(s_reaction_dic)}人 なう\n", value='\n'.join(s_user_reaction), inline=True)
             elif str(reaction.emoji) == f"{ra_a}":
                 a_user_reaction.append(user.nick)
-                
+                embed_body.set_field_at(3, name=f"{ra_a} {len(a_reaction_dic)}人 なう\n", value='\n'.join(a_user_reaction), inline=True)
             elif str(reaction.emoji) == f"{ra_b}":
                 b_user_reaction.append(user.nick)
-                        
+                embed_body.set_field_at(4, name=f"{ra_b} {len(b_reaction_dic)}人 なう\n", value='\n'.join(b_user_reaction), inline=True)        
             else:
                 pass
             
-            embed_body.set_field_at(0, name=f"{ra_x} {len(x_reaction_dic)}人 なう\n", value='\n'.join(x_user_reaction), inline=True)
-            embed_body.set_field_at(1, name=f"{ra_spl} {len(spl_reaction_dic)}人 なう\n", value='\n'.join(spl_user_reaction), inline=True)
-            embed_body.set_field_at(2, name=f"{ra_s} {len(s_reaction_dic)}人 なう\n", value='\n'.join(s_user_reaction), inline=True)
-            embed_body.set_field_at(3, name=f"{ra_a} {len(a_reaction_dic)}人 なう\n", value='\n'.join(a_user_reaction), inline=True)
-            embed_body.set_field_at(4, name=f"{ra_b} {len(b_reaction_dic)}人 なう\n", value='\n'.join(b_user_reaction), inline=True)
             await message.edit(embed=embed_body)
             await total_update()
         
