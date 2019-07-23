@@ -1,19 +1,42 @@
 import discord
 from discord.ext import commands
-import asyncio
-import time
 
 import os
 import traceback
 
-# 新しいEvent loop
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(asyncio.new_event_loop())
-
-
 client = commands.Bot(command_prefix='/')
 token = os.environ['DISCORD_BOT_TOKEN']
 
+
+
+# 各ユーザのリアクション(スタンプ)を保存して置くためのdict
+from collections import defaultdict
+user_reaction_dic = defaultdict(dict)
+print(user_reaction_dic)
+
+x_reaction_dic = defaultdict(dict)
+spl_reaction_dic = defaultdict(dict)
+s_reaction_dic = defaultdict(dict)
+a_reaction_dic = defaultdict(dict)
+b_reaction_dic = defaultdict(dict)
+
+# リアクションしたメンバーリストの作成
+x_user_reaction = []
+spl_user_reaction = []
+s_user_reaction = []
+a_user_reaction = []
+b_user_reaction = []
+total_user_reaction = []
+
+
+# 新しいEvent loop
+import asyncio
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(asyncio.new_event_loop())
+print('stated new event loop')
+
+
+# 起動時の処理
 @client.event
 async def on_ready():
     print('Logged in as')
@@ -21,10 +44,9 @@ async def on_ready():
     print(client.user.id)
     print('------')
 
+# コマンド入力時の処理
 @client.command()
-async def rect(ctx, about = "募集", settime = 86400):
-    settime = float(settime)
-
+async def boshu(ctx, about = "募集"):
     
     # カスタム絵文字の定義
     ra_x = client.get_emoji(598318118762446852)
@@ -33,63 +55,43 @@ async def rect(ctx, about = "募集", settime = 86400):
     ra_a = client.get_emoji(598318180762517515)
     ra_b = client.get_emoji(598318202577092609)
     
-    # 募集の欄
-    reaction_members_x = ['>>>']
-    reaction_members_spl = ['>>>']
-    reaction_members_s = ['>>>']
-    reaction_members_a = ['>>>']
-    reaction_members_b = ['>>>']
-    reaction_members_all = []
+    # リアクションしたメンバーの欄作成
+    embed_body = discord.Embed(title=about,colour=0x6699ff)
+    embed_body.add_field(name=f"{ra_x} {len(x_reaction_dic)}人 なう\n", value="\u200b", inline=True)
+    embed_body.add_field(name=f"{ra_spl} {len(spl_reaction_dic)}人 なう\n", value="\u200b", inline=True)
+    embed_body.add_field(name=f"{ra_s} {len(s_reaction_dic)}人 なう\n", value="\u200b", inline=True)
+    embed_body.add_field(name=f"{ra_a} {len(a_reaction_dic)}人 なう\n", value="\u200b", inline=True)
+    embed_body.add_field(name=f"{ra_b} {len(b_reaction_dic)}人 なう\n", value="\u200b", inline=True)
+    embed_body.add_field(name=f"🈴 全部で{len(user_reaction_dic)}人 なう\n", value="\u200b", inline=True)
     
-    mbr_cnt_x = len(reaction_members_x) - 1
-    mbr_cnt_spl = len(reaction_members_spl) - 1
-    mbr_cnt_s = len(reaction_members_s) - 1
-    mbr_cnt_a = len(reaction_members_a) - 1
-    mbr_cnt_b = len(reaction_members_b) - 1
+    message = await ctx.send(embed=embed_body)
+    message_id = message.id
+    print(message_id)
     
-    embed_body = discord.Embed(title=about,colour=0x1e90ff)
-    embed_body.add_field(name=f"{ra_x} {len(reaction_members_x) - 1}人 なう\n", value="\u200b", inline=True)
-    embed_body.add_field(name=f"{ra_spl} {len(reaction_members_spl) - 1}人 なう\n", value="\u200b", inline=True)
-    embed_body.add_field(name=f"{ra_s} {len(reaction_members_s) - 1}人 なう\n", value="\u200b", inline=True)
-    embed_body.add_field(name=f"{ra_a} {len(reaction_members_a) - 1}人 なう\n", value="\u200b", inline=True)
-    embed_body.add_field(name=f"{ra_b} {len(reaction_members_b) - 1}人 なう\n", value="\u200b", inline=True)
-    embed_body.add_field(name=f"🈴 全部で{len(reaction_members_all)}人 なう\n", value="\u200b", inline=True)
+    # リアクションの追加
+    await message.add_reaction(ra_x)
+    await message.add_reaction(ra_spl)
+    await message.add_reaction(ra_s)
+    await message.add_reaction(ra_a)
+    await message.add_reaction(ra_b)
     
-    msg = await ctx.send(embed=embed_body)
+    # 合計人数の更新の定義
+    async def total_update():
+        total_user_reaction.append(user.id)
+        embed_body.set_field_at(5, name=f"🈴 全部で{len(user_reaction_dic)}人 なう\n", value="\u200b", inline=True)
+        await message.edit(embed=embed_body)
+        print(total_user_reaction)
     
-    # 投票の欄
-    vote_list = (
-        ra_x,
-        ra_spl,
-        ra_s,
-        ra_a,
-        ra_b,
-        '↩',
-        )
-    for vote in vote_list:
-        await msg.add_reaction(vote)
-        
-    # 合計人数欄更新
-    async def total_update():        
-            reaction_members_all = reaction_members_x + \
-            reaction_members_spl + \
-            reaction_members_s + \
-            reaction_members_a + \
-            reaction_members_b
-            mbr_total = len(reaction_members_all) - 5
-            embed_body.set_field_at(5, name=f"🈴 全部で{mbr_total}人 なう\n", value="\u200b", inline=True)
-            await msg.edit(embed=embed_body)
-            print('投票結果更新')
+    async def total_update_fake():
+        embed_body.set_field_at(5, name=f"🈴 全部で{len(user_reaction_dic)}人 なう\n", value="\u200b", inline=True)
+        await message.edit(embed=embed_body)
 
-    # 動作内容
+
+    # ユーザーとリアクションのチェック
     def check(reaction, user):
         emoji = str(reaction.emoji)
         if user.bot == True:    # botは無視
             pass
-        #elif user.nick in reaction_members_all:    # 重複は無視
-            # リアクション消す。メッセージ管理権限がないとForbidden:エラーが出ます。
-            #msg.remove_reaction(str(reaction.emoji), user)
-            #pass
         else:
             return emoji == f"{ra_x}" or \
                 emoji == f"{ra_spl}" or \
@@ -100,120 +102,215 @@ async def rect(ctx, about = "募集", settime = 86400):
                 emoji == '🚫' or \
                 emoji == '✖'
         
-    # 時間制限
-    timeout_start = time.time()
-    timeout = 60
-    if timeout > settime:
-        timeout = settime
-    
-    print('準備完了')
-    
-    while time.time() < timeout_start + settime:
+    #　動作内容
+    while not client.is_closed():
         try:
-            print('リアクション待ちなう')
-            reaction, user = await client.wait_for('reaction_add', timeout=timeout, check=check)
-            print('リアクション来た')
-        except asyncio.TimeoutError:            
-            print('時間切れでループ')
+            reaction, user = await client.wait_for('reaction_add', timeout=None, check=check)
+        except asyncio.TimeoutError:
             pass
             
         else:
+                 
+            await total_update_fake()    #なぜかこれがないと人数が更新されない
+                
+                
             if str(reaction.emoji) == f"{ra_x}":
-                reaction_members_x.append(user.nick)
-                embed_body.set_field_at(0, name=f"{ra_x} {len(reaction_members_x) - 1}人 なう\n", value='\n'.join(reaction_members_x), inline=True)
-                await msg.edit(embed=embed_body) 
-                await total_update()
+                x_user_reaction.append(user.nick)
+                
+                if user.nick in spl_user_reaction:
+                    print('x_user_reactionに名前あり')
+                else:
+                    print('x_user_reactionに名前なし')
             
             elif str(reaction.emoji) == f"{ra_spl}":
-                reaction_members_spl.append(user.nick)
-                embed_body.set_field_at(1, name=f"{ra_spl} {len(reaction_members_spl) - 1}人 なう\n", value='\n'.join(reaction_members_spl), inline=True)
-                await msg.edit(embed=embed_body)
-                await total_update()
+                spl_user_reaction.append(user.nick)
             
             elif str(reaction.emoji) == f"{ra_s}":
-                reaction_members_s.append(user.nick)
-                embed_body.set_field_at(2, name=f"{ra_s} {len(reaction_members_s) - 1}人 なう\n", value='\n'.join(reaction_members_s), inline=True)
-                await msg.edit(embed=embed_body)
-                await total_update()
+                s_user_reaction.append(user.nick)
             
             elif str(reaction.emoji) == f"{ra_a}":
-                reaction_members_a.append(user.nick)
-                embed_body.set_field_at(3, name=f"{ra_a} {len(reaction_members_a) - 1}人 なう\n", value='\n'.join(reaction_members_a), inline=True)
-                await msg.edit(embed=embed_body)
-                await total_update()
-            
+                a_user_reaction.append(user.nick)
+                
             elif str(reaction.emoji) == f"{ra_b}":
-                reaction_members_b.append(user.nick)
-                embed_body.set_field_at(4, name=f"{ra_b} {len(reaction_members_b) - 1}人 なう\n", value='\n'.join(reaction_members_b), inline=True)
-                await msg.edit(embed=embed_body)
-                await total_update()
-
-                
-            elif str(reaction.emoji) == '↩':                    
-                if user.nick in reaction_members_x:
-                    reaction_members_x.remove(user.nick)
-                    embed_body.set_field_at(0, name=f"{ra_x} {len(reaction_members_x) - 1}人 なう\n", value='\n'.join(reaction_members_x), inline=True)
-                    await msg.edit(embed=embed_body)
-                    await total_update()
-                    
-                elif user.nick in reaction_members_spl:
-                    reaction_members_spl.remove(user.nick)
-                    embed_body.set_field_at(1, name=f"{ra_spl} {len(reaction_members_spl) - 1}人 なう\n", value='\n'.join(reaction_members_spl), inline=True)
-                    await msg.edit(embed=embed_body)
-                    await total_update()
-                    
-                elif user.nick in reaction_members_s:
-                    reaction_members_s.remove(user.nick)
-                    embed_body.set_field_at(2, name=f"{ra_s} {len(reaction_members_s) - 1}人 なう\n", value='\n'.join(reaction_members_s), inline=True)
-                    await msg.edit(embed=embed_body)
-                    await total_update()
-                    
-                elif user.nick in reaction_members_a:
-                    reaction_members_a.remove(user.nick)
-                    embed_body.set_field_at(3, name=f"{ra_a} {len(reaction_members_a) - 1}人 なう\n", value='\n'.join(reaction_members_a), inline=True)
-                    await msg.edit(embed=embed_body)
-                    await total_update()
-                    
-                elif user.nick in reaction_members_b:
-                    reaction_members_b.remove(user.nick)
-                    embed_body.set_field_at(4, name=f"{ra_b} {len(reaction_members_b) - 1}人 なう\n", value='\n'.join(reaction_members_b), inline=True)
-                    await msg.edit(embed=embed_body)
-                    await total_update()
-
-                
-                else:
-                    print('投票されてなかった')
-                    pass
-                
-                                                    
-            elif str(reaction.emoji) == '🚫':
-                for vote in vote_list:
-                    await msg.remove_reaction(vote, client.user)
-                embed_body.set_footer(text="＝＝＝＝募集は終了しました＝＝＝＝")
-                await msg.edit(embed=embed_body)
-                print('中止した')
-                break
-                
-            elif str(reaction.emoji) == '✖':
-                await msg.delete()
-                print('削除した')
-                break
-                
+                b_user_reaction.append(user.nick)
+                        
             else:
-                print('これ何？')
                 pass
             
-                
-            # リアクション消す。メッセージ管理権限がないとForbidden:エラーが出ます。
-            await msg.remove_reaction(str(reaction.emoji), user)
-            print('リアクション消した')
-
-    else:
-        for vote in vote_list:
-            await msg.remove_reaction(vote, client.user)
-        embed_body.set_footer(text="＝＝＝＝募集は終了しました＝＝＝＝")
-        await msg.edit(embed=embed_body)
-        print('時間切れで中止')
+            embed_body.set_field_at(0, name=f"{ra_x} {len(x_reaction_dic)}人 なう\n", value='\n'.join(x_user_reaction), inline=True)
+            embed_body.set_field_at(1, name=f"{ra_spl} {len(spl_reaction_dic)}人 なう\n", value='\n'.join(spl_user_reaction), inline=True)
+            embed_body.set_field_at(2, name=f"{ra_s} {len(s_reaction_dic)}人 なう\n", value='\n'.join(s_user_reaction), inline=True)
+            embed_body.set_field_at(3, name=f"{ra_a} {len(a_reaction_dic)}人 なう\n", value='\n'.join(a_user_reaction), inline=True)
+            embed_body.set_field_at(4, name=f"{ra_b} {len(b_reaction_dic)}人 なう\n", value='\n'.join(b_user_reaction), inline=True)
+            await message.edit(embed=embed_body)
+            await total_update()
         
+# リアクションが追加された時の処理
+@client.event
+async def on_reaction_add(reaction, user):
+    
+    # カスタム絵文字の定義
+    ra_x = client.get_emoji(598318118762446852)
+    ra_spl = client.get_emoji(598318135774412800)
+    ra_s = client.get_emoji(598318154707370012)    
+    ra_a = client.get_emoji(598318180762517515)
+    ra_b = client.get_emoji(598318202577092609)
+    
+    if user.bot == True:
+        pass
+    
+    else:
+        print('reaction added')
+        # リアクションが追加されたメッセージの取得
+        message = reaction.message
+    
+        # この投稿に対してこれまでにリアクションしたかを判定
+        if message.id not in user_reaction_dic[user.id]:
+            print('new reaction')
+            # 新しく登録された絵文字なので情報を保存しておく
+            user_reaction_dic[user.id][message.id] = reaction.emoji            
+            print(user_reaction_dic)
             
+            if str(reaction.emoji) == f"{ra_x}":
+                x_reaction_dic[user.id][message.id] = reaction.emoji
+                print(x_reaction_dic)
+            elif str(reaction.emoji) == f"{ra_spl}":
+                spl_reaction_dic[user.id][message.id] = reaction.emoji
+                print(spl_reaction_dic)
+            elif str(reaction.emoji) == f"{ra_s}":
+                s_reaction_dic[user.id][message.id] = reaction.emoji
+                print(s_reaction_dic)
+            elif str(reaction.emoji) == f"{ra_a}":
+                a_reaction_dic[user.id][message.id] = reaction.emoji
+                print(a_reaction_dic)
+            elif str(reaction.emoji) == f"{ra_b}":
+                b_reaction_dic[user.id][message.id] = reaction.emoji
+                print(b_reaction_dic)
+                
+        else:
+            print('duplicated reaction')
+            # 前回の絵文字を削除して更新する
+            await message.remove_reaction(user_reaction_dic[user.id][message.id], user)
+            user_reaction_dic[user.id][message.id] = reaction.emoji
+            print(user_reaction_dic)
+            
+            if str(reaction.emoji) == f"{ra_x}":
+                x_reaction_dic[user.id][message.id] = reaction.emoji
+                print(x_reaction_dic)
+                if message.id in spl_reaction_dic[user.id]:
+                    print('removing saved reaction info spl')
+                    del spl_reaction_dic[user.id][message.id]
+                    print(spl_reaction_dic)
+                elif message.id in s_reaction_dic[user.id]:
+                    print('removing saved reaction info s')
+                    del s_reaction_dic[user.id][message.id]
+                    print(s_reaction_dic)
+                elif message.id in a_reaction_dic[user.id]:
+                    print('removing saved reaction info a')
+                    del a_reaction_dic[user.id][message.id]
+                    print(a_reaction_dic)
+                elif message.id in b_reaction_dic[user.id]:
+                    print('removing saved reaction info b')
+                    del b_reaction_dic[user.id][message.id]
+                    print(b_reaction_dic)
+            elif str(reaction.emoji) == f"{ra_spl}":
+                spl_reaction_dic[user.id][message.id] = reaction.emoji
+                print(spl_reaction_dic)
+                if message.id in x_reaction_dic[user.id]:
+                    print('removing saved reaction info x')
+                    del x_reaction_dic[user.id][message.id]
+                    print(x_reaction_dic)
+                elif message.id in s_reaction_dic[user.id]:
+                    print('removing saved reaction info s')
+                    del s_reaction_dic[user.id][message.id]
+                    print(s_reaction_dic)
+                elif message.id in a_reaction_dic[user.id]:
+                    print('removing saved reaction info a')
+                    del a_reaction_dic[user.id][message.id]
+                    print(a_reaction_dic)
+                elif message.id in b_reaction_dic[user.id]:
+                    print('removing saved reaction info b')
+                    del b_reaction_dic[user.id][message.id]
+                    print(b_reaction_dic)
+            elif str(reaction.emoji) == f"{ra_s}":
+                s_reaction_dic[user.id][message.id] = reaction.emoji
+                print(s_reaction_dic)
+                if message.id in x_reaction_dic[user.id]:
+                    print('removing saved reaction info x')
+                    del x_reaction_dic[user.id][message.id]
+                    print(x_reaction_dic)
+                elif message.id in spl_reaction_dic[user.id]:
+                    print('removing saved reaction info spl')
+                    del s_reaction_dic[user.id][message.id]
+                    print(spl_reaction_dic)
+                elif message.id in a_reaction_dic[user.id]:
+                    print('removing saved reaction info a')
+                    del a_reaction_dic[user.id][message.id]
+                    print(a_reaction_dic)
+                elif message.id in b_reaction_dic[user.id]:
+                    print('removing saved reaction info b')
+                    del b_reaction_dic[user.id][message.id]
+                    print(b_reaction_dic)
+            elif str(reaction.emoji) == f"{ra_a}":
+                a_reaction_dic[user.id][message.id] = reaction.emoji
+                print(a_reaction_dic)
+                if message.id in x_reaction_dic[user.id]:
+                    print('removing saved reaction info x')
+                    del x_reaction_dic[user.id][message.id]
+                    print(x_reaction_dic)
+                elif message.id in spl_reaction_dic[user.id]:
+                    print('removing saved reaction info spl')
+                    del s_reaction_dic[user.id][message.id]
+                    print(spl_reaction_dic)
+                elif message.id in s_reaction_dic[user.id]:
+                    print('removing saved reaction info s')
+                    del s_reaction_dic[user.id][message.id]
+                    print(s_reaction_dic)
+                elif message.id in b_reaction_dic[user.id]:
+                    print('removing saved reaction info b')
+                    del b_reaction_dic[user.id][message.id]
+                    print(b_reaction_dic)
+            elif str(reaction.emoji) == f"{ra_b}":
+                b_reaction_dic[user.id][message.id] = reaction.emoji
+                print(b_reaction_dic)
+                if message.id in x_reaction_dic[user.id]:
+                    print('removing saved reaction info x')
+                    del x_reaction_dic[user.id][message.id]
+                    print(x_reaction_dic)
+                elif message.id in spl_reaction_dic[user.id]:
+                    print('removing saved reaction info spl')
+                    del s_reaction_dic[user.id][message.id]
+                    print(spl_reaction_dic)
+                elif message.id in s_reaction_dic[user.id]:
+                    print('removing saved reaction info s')
+                    del s_reaction_dic[user.id][message.id]
+                    print(s_reaction_dic)
+                elif message.id in a_reaction_dic[user.id]:
+                    print('removing saved reaction info a')
+                    del a_reaction_dic[user.id][message.id]
+                    print(a_reaction_dic)
+        
+# リアクションが削除された時の処理
+@client.event
+async def on_reaction_remove(reaction, user):
+    print('reaction removed')
+    
+    # カスタム絵文字の定義
+    ra_x = client.get_emoji(598318118762446852)
+    ra_spl = client.get_emoji(598318135774412800)
+    ra_s = client.get_emoji(598318154707370012)    
+    ra_a = client.get_emoji(598318180762517515)
+    ra_b = client.get_emoji(598318202577092609)
+    
+    # リアクションが追加されたメッセージの取得
+    message = reaction.message
+    
+    # 保存してあるリアクション情報と一致したらそれを削除しておく
+    if user_reaction_dic[user.id][message.id] == reaction.emoji:
+        print('removing saved reaction info')
+        del user_reaction_dic[user.id][message.id]
+        print(user_reaction_dic)
+        
+
+# BOTを実行
 client.run(token)
