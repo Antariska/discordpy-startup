@@ -36,7 +36,7 @@ async def boshu(ctx, about = "募集"):
     ra_b = discord.utils.get(ctx.guild.emojis, name='01ra_b')
     
     # create fields for reacted users
-    embed_body = discord.Embed(title=about,colour=0x6699ff)
+    embed_body = discord.Embed(title=about,colour=0x728bd3)
     embed_body.add_field(name=f"{ra_x} 0人 なう\n", value="\u200b", inline=True)
     embed_body.add_field(name=f"{ra_spl} 0人 なう\n", value="\u200b", inline=True)
     embed_body.add_field(name=f"{ra_s} 0人 なう\n", value="\u200b", inline=True)
