@@ -63,7 +63,7 @@ async def on_reaction_add(reaction, user):
         pass
     #elif message.id 
     else:
-        channel.send(user)
+        await channel.send(user)
         
         
 # run the bot    
