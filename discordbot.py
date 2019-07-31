@@ -5,12 +5,6 @@ import os
 import traceback
 
 
-# start new event loop - delete later
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(asyncio.new_event_loop())
-print('stated new event loop')
-
-
 client = discord.Client()
 token = os.environ['DISCORD_BOT_TOKEN']
 
@@ -59,7 +53,6 @@ async def on_message(message):
         # add reaction to the bot message as button - modify! ############
         await msg.add_reaction('↩')
         
-        print(f"{msg.id} - msg.id")
         with open(f"/content/sample_data/{msg.id}.txt", 'w') as file:
             pass
 
@@ -70,7 +63,7 @@ async def on_reaction_add(reaction, user):
         pass
     #elif message.id 
     else:
-        print(user)
+        channel.send(user)
         
         
 # run the bot    
