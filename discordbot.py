@@ -1,13 +1,9 @@
-import discord, asyncio, datetime, re
+import discord, asyncio
 from discord.ext import commands
 from queue import Queue
 
 import os
 import traceback
-
-# new event loop - DELETE LATER
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(asyncio.new_event_loop())
 
 
 client = commands.Bot(command_prefix='/')
@@ -25,41 +21,6 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
-    
-    
-    # define cutsom emojis
-    global ra_x, ra_spl, ra_s, ra_a, ra_b
-    ra_x = discord.utils.get(client.guilds[0].emojis, name='05ra_x')
-    ra_spl = discord.utils.get(client.guilds[0].emojis, name='04ra_spl')
-    ra_s = discord.utils.get(client.guilds[0].emojis, name='03ra_s')
-    ra_a = discord.utils.get(client.guilds[0].emojis, name='02ra_a')
-    ra_b = discord.utils.get(client.guilds[0].emojis, name='01ra_b')
-    
-    # define rank reactions
-    global reactions_rank
-    reactions_rank = (f"{ra_x}", f"{ra_spl}", f"{ra_s}", f"{ra_a}", f"{ra_b}")
-    
-    # runs timeout checks
-    path = '/boshu_files'
-    files = []
-    for filename in os.listdir(path):
-        if os.path.isfile(os.path.join(path, filename)):
-            files.append(filename)
-    timeout_files = []
-    regex = re.compile(r'(_timeout.txt)$')
-    for name in files:
-        if regex.search(name):
-            timeout_files.append(name)
-    for timeout_file in timeout_files:
-        with open(f"{path}/{timeout_file}") as open_timeout_file:
-            raw_data = open_timeout_file.read()
-        channel_id = int(raw_data[1: 19])
-        channel = client.get_channel(channel_id)
-        msg = await channel.fetch_message(int(timeout_file.strip('_timeout.txt')))
-        timeout = datetime.datetime.strptime(raw_data[22: -2], '%Y-%m-%d %H:%M:%S.%f')
-            
-        if datetime.datetime.now() > timeout:
-            await msg.add_reaction('🚫')
             
 
 # on command
@@ -67,38 +28,28 @@ async def on_ready():
 async def boshu(ctx, about = "募集", settime = 1):    # settime 24h, EDIT LATER
     settime = int(settime)
     
+    # define custom emojis
+    global ra_x, ra_spl, ra_s, ra_a, ra_b
+    ra_x = discord.utils.get(ctx.guild.emojis, name='05ra_x')
+    ra_spl = discord.utils.get(ctx.guild.emojis, name='04ra_spl')
+    ra_s = discord.utils.get(ctx.guild.emojis, name='03ra_s')
+    ra_a = discord.utils.get(ctx.guild.emojis, name='02ra_a')
+    ra_b = discord.utils.get(ctx.guild.emojis, name='01ra_b')
+    
+    # define rank reactions
+    global reactions_rank
+    reactions_rank = (f"{ra_x}", f"{ra_spl}", f"{ra_s}", f"{ra_a}", f"{ra_b}")
+    
     # create an embed for the reaction list
     embed_body = discord.Embed(title=about, colour=0x728bd3)    # EDIT COLOUR LATER
     for reaction_rank in reactions_rank:
         embed_body.add_field(name=f"{reaction_rank} 0人 なう\n", value="\u200b", inline=True)
     embed_body.add_field(name=f"🈴 全部で ０人 なう\n", value="\u200b", inline=True)
-    embed_body.set_footer(text=f"ウデマエ (Ｘ/Ｓ+/Ｓ/Ａ/Ｂ) をリアクション追加で参加　🚫で中止　✖で削除　\
+    embed_body.set_footer(text=f"ウデマエ (Ｘ/Ｓ+/Ｓ/Ａ/Ｂ) をリアクション追加で参加　\
     \n⚠名前が反映されない場合はリアクションを付け直して下さい")    
     
     # bot sends the message
     msg = await ctx.send(embed=embed_body)
-    
-    # define cutsom emojis - UNNECESSARY?
-    global ra_x, ra_spl, ra_s, ra_a, ra_b
-    ra_x = discord.utils.get(msg.guild.emojis, name='05ra_x')
-    ra_spl = discord.utils.get(msg.guild.emojis, name='04ra_spl')
-    ra_s = discord.utils.get(msg.guild.emojis, name='03ra_s')
-    ra_a = discord.utils.get(msg.guild.emojis, name='02ra_a')
-    ra_b = discord.utils.get(msg.guild.emojis, name='01ra_b')
-    
-    # define rank reactions - UNNECESSARY?
-    global reactions_rank
-    reactions_rank = (f"{ra_x}", f"{ra_spl}", f"{ra_s}", f"{ra_a}", f"{ra_b}")
-    
-    # create a file with message.id as file name and message author.id as content
-    with open(f"/boshu_files/{msg.id}.txt", 'w') as file:
-        file.write(str(ctx.author.id))
-    
-    # create a file with timeout info
-    with open(f"/boshu_files/{msg.id}_timeout.txt", 'w') as file:
-        dic = {}
-        dic[msg.channel.id] = str(datetime.datetime.now() + datetime.timedelta(days=settime))
-        file.write(str(dic))
 
 
 # on reaction add (raw)
@@ -109,7 +60,7 @@ async def on_raw_reaction_add(payload):
     channel = client.get_channel(payload.channel_id)
     msg = await channel.fetch_message(payload.message_id)
     
-    # define cutsom emojis
+    # define custom emojis
     global ra_x, ra_spl, ra_s, ra_a, ra_b
     ra_x = discord.utils.get(msg.guild.emojis, name='05ra_x')
     ra_spl = discord.utils.get(msg.guild.emojis, name='04ra_spl')
@@ -122,7 +73,7 @@ async def on_raw_reaction_add(payload):
     reactions_rank = (f"{ra_x}", f"{ra_spl}", f"{ra_s}", f"{ra_a}", f"{ra_b}")
     
     # if the message is by bot and is active
-    if msg.author.id == client.user.id and '🚫' in msg.embeds[0].footer.text:
+    if msg.author.id == client.user.id:
         
         # define user
         user = client.get_user(payload.user_id)
@@ -193,41 +144,6 @@ async def on_raw_reaction_add(payload):
                 users = await msg.reactions[i].users().flatten()
                 if user.name in str(users) and msg.reactions[i].emoji != payload.emoji:
                     await msg.remove_reaction(msg.reactions[i].emoji, user)
-        
-        elif str(payload.emoji) == '🚫':
-            
-            # get command author
-            file_path = str(f"/boshu_files/{payload.message_id}.txt")
-            with open(file_path) as open_file:
-                command_author_id = open_file.read()
-                
-            # stop vote function if command author
-            if str(payload.user_id) == command_author_id or payload.user_id == client.user.id:
-                
-                await msg.clear_reactions()
-                embed_body.set_footer(text="＝＝＝＝＝＝募集を中止しました＝＝＝＝＝＝")
-                await msg.edit(embed=embed_body)
-                os.remove(file_path)
-                file_path_timeout = str(f"/boshu_files/{payload.message_id}_timeout.txt")
-                os.remove(file_path_timeout)
-                    
-            else:
-                pass
-        
-        elif str(payload.emoji) == '✖':
-            
-            # get command author
-            file_path = str(f"/boshu_files/{payload.message_id}.txt")
-            with open(file_path) as open_file:
-                command_author_id = open_file.read()
-                
-            # delete msg if command author
-            if str(payload.user_id) == command_author_id:
-                    
-                await msg.delete()
-                os.remove(file_path)
-                file_path_timeout = str(f"/boshu_files/{payload.message_id}_timeout.txt")
-                os.remove(file_path_timeout)
                     
             else:
                 pass
@@ -249,7 +165,7 @@ async def on_raw_reaction_remove(payload):
     channel = client.get_channel(payload.channel_id)
     msg = await channel.fetch_message(payload.message_id)
     
-    # define cutsom emojis
+    # define custom emojis
     global ra_x, ra_spl, ra_s, ra_a, ra_b
     ra_x = discord.utils.get(msg.guild.emojis, name='05ra_x')
     ra_spl = discord.utils.get(msg.guild.emojis, name='04ra_spl')
@@ -262,7 +178,7 @@ async def on_raw_reaction_remove(payload):
     reactions_rank = (f"{ra_x}", f"{ra_spl}", f"{ra_s}", f"{ra_a}", f"{ra_b}")
     
     # if the message is by bot and is active
-    if msg.author.id == client.user.id and '🚫' in msg.embeds[0].footer.text:
+    if msg.author.id == client.user.id:
         
         # if the removed reaction is a rank
         if str(payload.emoji) in reactions_rank:
