@@ -106,8 +106,9 @@ async def on_raw_reaction_add(payload):
         # define embed_body
         embed_body = msg.embeds[0]
         
+        reactions_rank_name = ['05ra_x', '04ra_spl', '03ra_s', '02ra_a', '01ra_b']
         # if the added reaction is a rank
-        if str(payload.emoji) in reactions_rank:
+        if str(payload.emoji.name) in reactions_rank_name:
             
             # get index no for the field of the reactioned rank
             def index_no():
