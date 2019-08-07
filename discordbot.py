@@ -78,13 +78,17 @@ async def boshu(ctx, about = "募集", settime = 1):    # settime 24h, EDIT LATE
     # bot sends the message
     msg = await ctx.send(embed=embed_body)
     
-    # define cutsom emojis
+    # define cutsom emojis - UNNECESSARY?
     global ra_x, ra_spl, ra_s, ra_a, ra_b
     ra_x = discord.utils.get(msg.guild.emojis, name='05ra_x')
     ra_spl = discord.utils.get(msg.guild.emojis, name='04ra_spl')
     ra_s = discord.utils.get(msg.guild.emojis, name='03ra_s')
     ra_a = discord.utils.get(msg.guild.emojis, name='02ra_a')
     ra_b = discord.utils.get(msg.guild.emojis, name='01ra_b')
+    
+    # define rank reactions - UNNECESSARY?
+    global reactions_rank
+    reactions_rank = (f"{ra_x}", f"{ra_spl}", f"{ra_s}", f"{ra_a}", f"{ra_b}")
     
     # create a file with message.id as file name and message author.id as content
     with open(f"/boshu_files/{msg.id}.txt", 'w') as file:
@@ -112,6 +116,10 @@ async def on_raw_reaction_add(payload):
     ra_s = discord.utils.get(msg.guild.emojis, name='03ra_s')
     ra_a = discord.utils.get(msg.guild.emojis, name='02ra_a')
     ra_b = discord.utils.get(msg.guild.emojis, name='01ra_b')
+    
+    # define rank reactions
+    global reactions_rank
+    reactions_rank = (f"{ra_x}", f"{ra_spl}", f"{ra_s}", f"{ra_a}", f"{ra_b}")
     
     # if the message is by bot and is active
     if msg.author.id == client.user.id and '🚫' in msg.embeds[0].footer.text:
@@ -248,6 +256,10 @@ async def on_raw_reaction_remove(payload):
     ra_s = discord.utils.get(msg.guild.emojis, name='03ra_s')
     ra_a = discord.utils.get(msg.guild.emojis, name='02ra_a')
     ra_b = discord.utils.get(msg.guild.emojis, name='01ra_b')
+    
+    # define rank reactions
+    global reactions_rank
+    reactions_rank = (f"{ra_x}", f"{ra_spl}", f"{ra_s}", f"{ra_a}", f"{ra_b}")
     
     # if the message is by bot and is active
     if msg.author.id == client.user.id and '🚫' in msg.embeds[0].footer.text:
