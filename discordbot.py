@@ -25,8 +25,7 @@ async def on_ready():
 
 # on command
 @client.command()
-async def boshu(ctx, about = "募集", settime = 1):    # settime 24h, EDIT LATER
-    settime = int(settime)
+async def boshu(ctx, about = "募集"):    # settime 24h, EDIT LATER
     
     # define custom emojis
     global ra_x, ra_spl, ra_s, ra_a, ra_b
@@ -41,7 +40,7 @@ async def boshu(ctx, about = "募集", settime = 1):    # settime 24h, EDIT LATE
     reactions_rank = (f"{ra_x}", f"{ra_spl}", f"{ra_s}", f"{ra_a}", f"{ra_b}")
     
     # create an embed for the reaction list
-    embed_body = discord.Embed(title=about, colour=0x728bd3)    # EDIT COLOUR LATER
+    embed_body = discord.Embed(title=about, colour=0x3e62ad)    # EDIT COLOUR LATER
     for reaction_rank in reactions_rank:
         embed_body.add_field(name=f"{reaction_rank} 0人 なう\n", value="\u200b", inline=True)
     embed_body.add_field(name=f"🈴 全部で ０人 なう\n", value="\u200b", inline=True)
