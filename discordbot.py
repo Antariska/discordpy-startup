@@ -78,6 +78,14 @@ async def boshu(ctx, about = "募集", settime = 1):    # settime 24h, EDIT LATE
     # bot sends the message
     msg = await ctx.send(embed=embed_body)
     
+    # define cutsom emojis
+    global ra_x, ra_spl, ra_s, ra_a, ra_b
+    ra_x = discord.utils.get(msg.guild.emojis, name='05ra_x')
+    ra_spl = discord.utils.get(msg.guild.emojis, name='04ra_spl')
+    ra_s = discord.utils.get(msg.guild.emojis, name='03ra_s')
+    ra_a = discord.utils.get(msg.guild.emojis, name='02ra_a')
+    ra_b = discord.utils.get(msg.guild.emojis, name='01ra_b')
+    
     # create a file with message.id as file name and message author.id as content
     with open(f"/boshu_files/{msg.id}.txt", 'w') as file:
         file.write(str(ctx.author.id))
@@ -97,6 +105,14 @@ async def on_raw_reaction_add(payload):
     channel = client.get_channel(payload.channel_id)
     msg = await channel.fetch_message(payload.message_id)
     
+    # define cutsom emojis
+    global ra_x, ra_spl, ra_s, ra_a, ra_b
+    ra_x = discord.utils.get(msg.guild.emojis, name='05ra_x')
+    ra_spl = discord.utils.get(msg.guild.emojis, name='04ra_spl')
+    ra_s = discord.utils.get(msg.guild.emojis, name='03ra_s')
+    ra_a = discord.utils.get(msg.guild.emojis, name='02ra_a')
+    ra_b = discord.utils.get(msg.guild.emojis, name='01ra_b')
+    
     # if the message is by bot and is active
     if msg.author.id == client.user.id and '🚫' in msg.embeds[0].footer.text:
         
@@ -106,9 +122,8 @@ async def on_raw_reaction_add(payload):
         # define embed_body
         embed_body = msg.embeds[0]
         
-        reactions_rank_name = ['05ra_x', '04ra_spl', '03ra_s', '02ra_a', '01ra_b']
         # if the added reaction is a rank
-        if str(payload.emoji.name) in reactions_rank_name:
+        if str(payload.emoji) in reactions_rank:
             
             # get index no for the field of the reactioned rank
             def index_no():
@@ -225,6 +240,14 @@ async def on_raw_reaction_remove(payload):
     # define msg
     channel = client.get_channel(payload.channel_id)
     msg = await channel.fetch_message(payload.message_id)
+    
+    # define cutsom emojis
+    global ra_x, ra_spl, ra_s, ra_a, ra_b
+    ra_x = discord.utils.get(msg.guild.emojis, name='05ra_x')
+    ra_spl = discord.utils.get(msg.guild.emojis, name='04ra_spl')
+    ra_s = discord.utils.get(msg.guild.emojis, name='03ra_s')
+    ra_a = discord.utils.get(msg.guild.emojis, name='02ra_a')
+    ra_b = discord.utils.get(msg.guild.emojis, name='01ra_b')
     
     # if the message is by bot and is active
     if msg.author.id == client.user.id and '🚫' in msg.embeds[0].footer.text:
