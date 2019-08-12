@@ -110,10 +110,10 @@ async def on_raw_reaction_add(payload):
                     pass
                 else:
                     if msg.embeds[0].fields[index_no()].value == "\u200b":
-                        embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split(\n))}人 なう\n", \
+                        embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split('\n'))}人 なう\n", \
                                                 value=str(msg.embeds[0].fields[index_no()].value + user.name), inline=True)
                     else:
-                        embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split(\n)) + 1}人 なう\n", \
+                        embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split('\n')) + 1}人 なう\n", \
                                                 value=str(msg.embeds[0].fields[index_no()].value + f"\n{user.name}"), inline=True)
             
                 # update the total field
@@ -212,15 +212,15 @@ async def on_raw_reaction_remove(payload):
                 
                 # delete the user.name from the field - ERROR IF MULTIPLE REACTIONS AT THE SAME TIME
                 if f"\n{user.name}" in msg.embeds[0].fields[index_no()].value:
-                    embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split(\n)) - 1}人 なう\n", \
+                    embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split('\n')) - 1}人 なう\n", \
                                             value=str(msg.embeds[0].fields[index_no()].value.replace(f"\n{user.name}", "")), inline=True)
                 else:
                     if f"{user.name}\n" in msg.embeds[0].fields[index_no()].value:
-                        embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split(\n)) - 1}人 なう\n", \
+                        embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split('\n')) - 1}人 なう\n", \
                                                 value=str(msg.embeds[0].fields[index_no()].value.replace(f"{user.name}\n", "")), inline=True)
                     else:
                         if user.name in msg.embeds[0].fields[index_no()].value:
-                            embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split(\n)) - 1}人 なう\n", \
+                            embed_body.set_field_at(index_no(), name=f"{payload.emoji} {len(msg.embeds[0].fields[index_no()].value.split('\n')) - 1}人 なう\n", \
                                                     value=str(msg.embeds[0].fields[index_no()].value.replace(user.name, "")), inline=True)        
                         else:
                             pass
